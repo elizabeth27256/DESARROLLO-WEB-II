@@ -1,0 +1,33 @@
+*{
+    margin: 0;
+    padding: 0;
+}
+
+body{
+    display: flex;
+}
+aside{
+    display: flex;
+    align-items:center;
+    padding: 8px;
+    width: 30%;
+    background-color: #E6521F;
+}
+section{
+    height: 100vh;
+    width: 70%;
+    background-color: #FB9E3A;
+}
+
+#contact-form{
+    display: flex;
+    gap: 4px; 
+    flex-direction: column;
+
+}
+
+#btn-mostrar-mas {
+  display: flex;
+  gap: 4px;
+  flex-direction: column; 
+}
