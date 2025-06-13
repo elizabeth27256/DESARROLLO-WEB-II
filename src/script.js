@@ -1,99 +1,121 @@
 let form = document.getElementById("contact-form");
 let lista = document.getElementById("lista-contactos");
 let eliminarContacto = document.getElementById("eliminar");
-let btnMostrarMas = document.getElementById("btn-mostrar-mas");
-
-let cantidadMostrada = 0;
-const cantidad_click = 5;
+let aceptarEdicion = document.getElementById("aceptar-edicion");
+let cantidadMostrar = document.getElementById("cantidad-mostrar");
+let botonOrdenar = document.getElementById("ordenar-nombre");
+let indiceEdicion = -1;
 
 form.addEventListener("submit", (e) => {
     e.preventDefault();
-    let nombre = document.getElementById("nombre").value.trim();
-    let email = document.getElementById("email").value.trim();
-    let telefono = document.getElementById("telefono").value.trim();
-    if (nombre.length < 2) {
-        alert("El nombre debe tener al menos dos caracteres.");
+
+    const nombre = document.getElementById("nombre").value.trim();
+    const email = document.getElementById("email").value;
+    const telefono = document.getElementById("telefono").value;
+
+    if (nombre.length <= 2) {
+        alert("El nombre debe tener más de 2 caracteres.");
         return;
     }
+
     if (!/^\d+$/.test(telefono)) {
-        alert("El teléfono solo debe contener números.");
+        alert("El número de teléfono solo debe tener números.");
         return;
     }
-    let contact = { nombre, email, telefono };
-    let contactos = JSON.parse(localStorage.getItem("contactos")) || [];
-    contactos.push(contact);
-    localStorage.setItem("contactos", JSON.stringify(contactos));
-    form.reset();
-    cantidadMostrada = 0;
-    lista.innerHTML = "";
-    mostrarMasContactos();
+
+    if (indiceEdicion === -1) {
+        let contacto = { nombre, email, telefono };
+        let contactos = JSON.parse(localStorage.getItem("contactos")) || [];
+        contactos.push(contacto);
+        localStorage.setItem("contactos", JSON.stringify(contactos));
+        form.reset();
+        mostrarContactos();
+    }
+});
+
+aceptarEdicion.addEventListener("click", (e) => {
+    e.preventDefault();
+    const nombre = document.getElementById("nombre").value.trim();
+    const email = document.getElementById("email").value;
+    const telefono = document.getElementById("telefono").value;
+
+    if (nombre.length <= 2) {
+        alert("El nombre debe tener más de 2 caracteres.");
+        return;
+    }
+
+    if (!/^\d+$/.test(telefono)) {
+        alert("El número de teléfono solo debe tener números.");
+        return;
+    }
+
+    if (indiceEdicion !== -1) {
+        let contactos = JSON.parse(localStorage.getItem("contactos")) || [];
+        contactos[indiceEdicion] = { nombre, email, telefono };
+        localStorage.setItem("contactos", JSON.stringify(contactos));
+        indiceEdicion = -1;
+        form.reset();
+        aceptarEdicion.style.display = "none";
+        mostrarContactos();
+    }
 });
 
 eliminarContacto.addEventListener("click", () => {
-    eliminarContactos();
-});
-
-btnMostrarMas.addEventListener("click", () => {
-    mostrarMasContactos();
-});
-
-function mostrarMasContactos() {
     let contactos = JSON.parse(localStorage.getItem("contactos")) || [];
-    contactos.sort((a, b) => a.nombre.localeCompare(b.nombre));
+    if (contactos.length > 0) {
+        contactos.pop();
+        localStorage.setItem("contactos", JSON.stringify(contactos));
+        mostrarContactos();
+    }
+});
 
-    for (let i = cantidadMostrada; i < cantidadMostrada + cantidad_click && i < contactos.length; i++) {
-        const c = contactos[i];
+function mostrarContactos() {
+    let contactos = JSON.parse(localStorage.getItem("contactos")) || [];
+    lista.innerHTML = "";
+    let cantidadSeleccionada = cantidadMostrar?.value || "todos";
+    let contactosAMostrar = (cantidadSeleccionada === "todos")
+        ? contactos
+        : contactos.slice(0, parseInt(cantidadSeleccionada));
+
+    contactosAMostrar.forEach((c, i) => {
         const card = document.createElement("div");
         card.classList.add("info-contacto");
         card.innerHTML = `
-            <strong>${c.nombre}</strong><br>
-            ${c.email} - ${c.telefono}<br>
-            <button onclick="editarContacto(${i})">Editar</button>`;
+            <div class="contenido-contacto">
+                <strong>${c.nombre}</strong><br>
+                ${c.email} - ${c.telefono}<br><br>
+                <button onclick="editarContacto(${i})" title="Editar">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                </button>
+            </div>`;
+
         lista.appendChild(card);
-    }
-
-    cantidadMostrada += cantidad_click;
+    });
 }
 
-function eliminarContactos() {
+cantidadMostrar.addEventListener("change", mostrarContactos);
+
+botonOrdenar.addEventListener("click", (e) => {
+    e.preventDefault();
     let contactos = JSON.parse(localStorage.getItem("contactos")) || [];
-    contactos.pop();
+    contactos.sort((a, b) => a.nombre.localeCompare(b.nombre));
     localStorage.setItem("contactos", JSON.stringify(contactos));
-    lista.innerHTML = "";
-    cantidadMostrada = 0;
-    mostrarMasContactos();
-}
+    mostrarContactos();
+});
 
-function editarContacto(index) {
+window.editarContacto = function (indice) {
     let contactos = JSON.parse(localStorage.getItem("contactos")) || [];
-    let contacto = contactos[index];
+    let contacto = contactos[indice];
+    document.getElementById("nombre").value = contacto.nombre;
+    document.getElementById("email").value = contacto.email;
+    document.getElementById("telefono").value = contacto.telefono;
 
-    let nuevoNombre = prompt("Editar nombre:", contacto.nombre);
-    if (!nuevoNombre || nuevoNombre.trim().length < 2) {
-        alert("El nombre debe tener al menos dos caracteres.");
-        return;
-    }
+    indiceEdicion = indice;
+    aceptarEdicion.style.display = "inline-block";
+};
 
-    let nuevoEmail = prompt("Editar correo:", contacto.email);
-    let nuevoTelefono = prompt("Editar teléfono:", contacto.telefono);
-    if (!/^\d+$/.test(nuevoTelefono)) {
-        alert("El teléfono solo debe contener números.");
-        return;
-    }
-
-    contacto.nombre = nuevoNombre.trim();
-    contacto.email = nuevoEmail.trim();
-    contacto.telefono = nuevoTelefono.trim();
-
-    contactos[index] = contacto;
-    localStorage.setItem("contactos", JSON.stringify(contactos));
-    lista.innerHTML = "";
-    cantidadMostrada = 0;
-    mostrarMasContactos();
-}
-
-// Mostrar los primeros al cargar
-mostrarMasContactos();
+aceptarEdicion.style.display = "none";
+mostrarContactos();
 
 //eliminar una contacto,
 // validaciondes de numero de telefono debe contener numeros,
