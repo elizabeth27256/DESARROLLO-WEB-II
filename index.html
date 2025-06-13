@@ -5,23 +5,32 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <title>Contactos</title>
 </head>
 
 <body>
     <aside>
+        <h1>Ingreso de contactos</h1>
         <form id="contact-form" action="">
             <input id="nombre" type="text" placeholder="Nombre" required />
             <input id="email" type="email" placeholder="Correo" required />
             <input id="telefono" type="tel" placeholder="Teléfono" required />
             <button type="submit">Agregar Contacto</button>
             <button type="button" id="eliminar">Eliminar Contacto</button>
-            <button id="btn-mostrar-mas">Mostrar más contactos</button>
+            <button id="aceptar-edicion" style="display:none;">Aceptar</button>
+            <button id="ordenar-nombre">Ordenar alfabéticamente</button>
         </form>
     </aside>
 
     <section>
         <h2>Lista de contactos</h2>
+        <label for="cantidad-mostrar">Mostrar:</label>
+        <select id="cantidad-mostrar">
+            <option value="5">5 contactos</option>
+            <option value="10">10 contactos</option>
+            <option value="todos">Todos</option>
+        </select>
         <div id="lista-contactos"></div>
     </section>
 
